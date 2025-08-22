@@ -1,7 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { auth, googleProvider } from '../lib/firebase'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, User } from 'firebase/auth'
 
 export default function HomePage() {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -9,25 +7,20 @@ export default function HomePage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [user, setUser] = useState<User | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     try {
-      let userCredential;
-      if (isSignUp) {
-        userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      } else {
-        userCredential = await signInWithEmailAndPassword(auth, email, password)
-      }
-      setUser(userCredential.user)
-      console.log('Authentication successful:', userCredential.user)
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Authentication failed'
-      setError(message)
+      // TODO: Add Firebase authentication
+      console.log('Authentication:', { email, password, isSignUp })
+      // Simulate authentication
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      // For demo - show success message
+      alert(`${isSignUp ? 'Account created' : 'Signed in'} successfully!`)
+    } catch (error: any) {
+      setError(error.message || 'Authentication failed')
     } finally {
       setLoading(false)
     }
@@ -36,12 +29,11 @@ export default function HomePage() {
   const handleGoogleAuth = async () => {
     setLoading(true)
     try {
-      const result = await signInWithPopup(auth, googleProvider)
-      setUser(result.user)
-      console.log('Google authentication successful:', result.user)
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Google authentication failed'
-      setError(message)
+      // TODO: Add Google authentication
+      console.log('Google authentication')
+      alert('Google authentication - Coming soon!')
+    } catch (error: any) {
+      setError(error.message || 'Google authentication failed')
     } finally {
       setLoading(false)
     }
@@ -60,6 +52,7 @@ export default function HomePage() {
           boxShadow: 'var(--im-shadow-3d)'
         }}
       >
+        {/* Logo and Branding */}
         <div className="text-center mb-8">
           <div
             className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-black"
@@ -85,6 +78,7 @@ export default function HomePage() {
           </p>
         </div>
 
+        {/* Tab Buttons */}
         <div className="flex mb-6 rounded-lg p-1" style={{
           backgroundColor: 'var(--im-bg-secondary)'
         }}>
@@ -108,6 +102,7 @@ export default function HomePage() {
           </button>
         </div>
 
+        {/* Error Message */}
         {error && (
           <div className="mb-4 p-3 rounded-lg" style={{
             backgroundColor: 'var(--im-error-bg)',
@@ -117,6 +112,7 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* Authentication Form */}
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium mb-2" style={{
@@ -138,6 +134,7 @@ export default function HomePage() {
               }}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{
               color: 'var(--im-text)'
@@ -158,6 +155,7 @@ export default function HomePage() {
               }}
             />
           </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -171,6 +169,7 @@ export default function HomePage() {
           </button>
         </form>
 
+        {/* Divider */}
         <div className="my-6 flex items-center">
           <div className="flex-1 h-px" style={{
             backgroundColor: 'var(--im-border)'
@@ -185,6 +184,7 @@ export default function HomePage() {
           }}></div>
         </div>
 
+        {/* Google Sign In */}
         <button
           onClick={handleGoogleAuth}
           disabled={loading}
@@ -203,6 +203,7 @@ export default function HomePage() {
           Google
         </button>
 
+        {/* Help Text */}
         <div className="mt-6 text-center">
           <p className="text-sm" style={{
             color: 'var(--im-text-secondary)'
@@ -211,6 +212,7 @@ export default function HomePage() {
           </p>
         </div>
 
+        {/* Demo Features */}
         <div className="mt-8 text-center">
           <p className="text-sm mb-2" style={{
             color: 'var(--im-text-secondary)'
