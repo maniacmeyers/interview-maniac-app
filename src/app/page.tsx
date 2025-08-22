@@ -12,6 +12,7 @@ export default function HomePage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
     try {
       // TODO: Add Firebase authentication
       console.log('Authentication:', { email, password, isSignUp })
@@ -19,8 +20,8 @@ export default function HomePage() {
       await new Promise(resolve => setTimeout(resolve, 1000))
       // For demo - show success message
       alert(`${isSignUp ? 'Account created' : 'Signed in'} successfully!`)
-    } catch (error: any) {
-      setError(error.message || 'Authentication failed')
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Authentication failed')
     } finally {
       setLoading(false)
     }
@@ -32,8 +33,8 @@ export default function HomePage() {
       // TODO: Add Google authentication
       console.log('Google authentication')
       alert('Google authentication - Coming soon!')
-    } catch (error: any) {
-      setError(error.message || 'Google authentication failed')
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Google authentication failed')
     } finally {
       setLoading(false)
     }
