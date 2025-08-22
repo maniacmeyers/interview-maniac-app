@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
+import { auth, googleProvider } from '../lib/firebase'
 
 export default function HomePage() {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -12,14 +14,15 @@ export default function HomePage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
+    
     try {
-      // TODO: Add Firebase authentication
-      console.log('Authentication:', { email, password, isSignUp })
-      // Simulate authentication
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      // For demo - show success message
-      alert(`${isSignUp ? 'Account created' : 'Signed in'} successfully!`)
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password)
+        alert('Account created successfully!')
+      } else {
+        await signInWithEmailAndPassword(auth, email, password)
+        alert('Signed in successfully!')
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'Authentication failed')
     } finally {
@@ -30,9 +33,8 @@ export default function HomePage() {
   const handleGoogleAuth = async () => {
     setLoading(true)
     try {
-      // TODO: Add Google authentication
-      console.log('Google authentication')
-      alert('Google authentication - Coming soon!')
+      await signInWithPopup(auth, googleProvider)
+      alert('Google authentication successful!')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'Google authentication failed')
     } finally {
@@ -135,7 +137,6 @@ export default function HomePage() {
               }}
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-2" style={{
               color: 'var(--im-text)'
@@ -156,7 +157,6 @@ export default function HomePage() {
               }}
             />
           </div>
-
           <button
             type="submit"
             disabled={loading}
