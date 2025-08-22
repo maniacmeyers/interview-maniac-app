@@ -25,8 +25,9 @@ export default function HomePage() {
       }
       setUser(userCredential.user)
       console.log('Authentication successful:', userCredential.user)
-    } catch (error: any) {
-      setError(error.message || 'Authentication failed')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Authentication failed'
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -38,8 +39,9 @@ export default function HomePage() {
       const result = await signInWithPopup(auth, googleProvider)
       setUser(result.user)
       console.log('Google authentication successful:', result.user)
-    } catch (error: any) {
-      setError(error.message || 'Google authentication failed')
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Google authentication failed'
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -136,7 +138,6 @@ export default function HomePage() {
               }}
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium mb-2" style={{
               color: 'var(--im-text)'
@@ -157,7 +158,6 @@ export default function HomePage() {
               }}
             />
           </div>
-
           <button
             type="submit"
             disabled={loading}
