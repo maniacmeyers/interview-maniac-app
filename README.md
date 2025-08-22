@@ -1,4 +1,14 @@
+# Interview Maniac App
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Repository Structure
+
+The application lives at the repository root with the following structure:
+- `src/` - Source code directory
+- `package.json` - Project dependencies and scripts
+- `next.config.js` - Next.js configuration
+- `tailwind.config.ts` - Tailwind CSS configuration
 
 ## Getting Started
 
@@ -29,8 +39,10 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The production version of this application is deployed on Vercel at [interview-maniac-app.vercel.app](https://interview-maniac-app.vercel.app).
+
+To deploy your own instance, the easiest way is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
