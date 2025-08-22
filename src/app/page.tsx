@@ -1,235 +1,355 @@
-'use client'
-import { useState } from 'react'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
-import { auth, googleProvider } from '../lib/firebase'
+'use client';
 
-export default function HomePage() {
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+import React, { useState, useEffect } from 'react';
+import { User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { addAbtSession, listAbtSessions, AbtSession } from '@/lib/firestore';
+import AuthPanel from '@/components/AuthPanel';
+import Protected from '@/components/Protected';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Plus, Clock, User as UserIcon, Building, Award, Target } from 'lucide-react';
+
+interface AbtFormData {
+  role: string;
+  industry: string;
+  achievement: string;
+  because: string;
+  therefore: string;
+}
+
+const AbtSessionForm: React.FC<{ user: User; onSessionAdded: () => void }> = ({ user, onSessionAdded }) => {
+  const [formData, setFormData] = useState<AbtFormData>({
+    role: '',
+    industry: '',
+    achievement: '',
+    because: '',
+    therefore: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleInputChange = (field: keyof AbtFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    
-    try {
-      if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password)
-        alert('Account created successfully!')
-      } else {
-        await signInWithEmailAndPassword(auth, email, password)
-        alert('Signed in successfully!')
-      }
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'Authentication failed')
-    } finally {
-      setLoading(false)
-    }
-  }
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
-  const handleGoogleAuth = async () => {
-    setLoading(true)
     try {
-      await signInWithPopup(auth, googleProvider)
-      alert('Google authentication successful!')
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'Google authentication failed')
+      await addAbtSession(user.uid, formData);
+      setFormData({
+        role: '',
+        industry: '',
+        achievement: '',
+        because: '',
+        therefore: ''
+      });
+      setSuccess(true);
+      onSessionAdded();
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to create ABT session');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Plus className="h-5 w-5" />
+          Create New ABT Session
+        </CardTitle>
+        <CardDescription>
+          Structure your achievements using the Accomplishment-Because-Therefore framework
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {success && (
+          <Alert className="mb-4 border-green-500 bg-green-50">
+            <AlertDescription>ABT session created successfully!</AlertDescription>
+          </Alert>
+        )}
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Role/Position
+              </label>
+              <Input
+                value={formData.role}
+                onChange={(e) => handleInputChange('role', e.target.value)}
+                placeholder="e.g., Software Engineer, Product Manager"
+                required
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Industry/Company
+              </label>
+              <Input
+                value={formData.industry}
+                onChange={(e) => handleInputChange('industry', e.target.value)}
+                placeholder="e.g., Technology, Healthcare, Finance"
+                required
+                disabled={loading}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Achievement (What did you accomplish?)
+            </label>
+            <Textarea
+              value={formData.achievement}
+              onChange={(e) => handleInputChange('achievement', e.target.value)}
+              placeholder="Describe your specific accomplishment..."
+              rows={3}
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Because (Why was this challenging/important?)
+            </label>
+            <Textarea
+              value={formData.because}
+              onChange={(e) => handleInputChange('because', e.target.value)}
+              placeholder="Explain the context, challenges, or importance..."
+              rows={3}
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Therefore (What was the impact/result?)
+            </label>
+            <Textarea
+              value={formData.therefore}
+              onChange={(e) => handleInputChange('therefore', e.target.value)}
+              placeholder="Describe the measurable impact or outcome..."
+              rows={3}
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>
+            ) : (
+              <>Create ABT Session</>
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+};
+
+const AbtSessionsList: React.FC<{ user: User; refresh: number }> = ({ user, refresh }) => {
+  const [sessions, setSessions] = useState<AbtSession[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadSessions = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const userSessions = await listAbtSessions(user.uid);
+        setSessions(userSessions);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to load ABT sessions');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSessions();
+  }, [user.uid, refresh]);
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return 'Unknown date';
+    try {
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return 'Unknown date';
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center p-8">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="ml-2">Loading your ABT sessions...</span>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{
-      backgroundColor: 'var(--im-bg)'
-    }}>
-      <div
-        className="w-full max-w-md mx-4 p-8 rounded-xl"
-        style={{
-          backgroundColor: 'var(--im-card)',
-          border: '1px solid transparent',
-          backgroundImage: 'linear-gradient(var(--im-card), var(--im-card)) padding-box, linear-gradient(90deg, var(--im-accent-1), var(--im-accent-2), var(--im-accent-3)) border-box',
-          boxShadow: 'var(--im-shadow-3d)'
-        }}
-      >
-        {/* Logo and Branding */}
-        <div className="text-center mb-8">
-          <div
-            className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-black"
-            style={{ background: 'linear-gradient(90deg, var(--im-accent-1), var(--im-accent-2))' }}
-          >
-            IM
-          </div>
-          <h1
-            className="text-3xl font-bold mb-2"
-            style={{
-              background: 'linear-gradient(90deg, var(--im-accent-1), var(--im-accent-2), var(--im-accent-3))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}
-          >
-            Interview Maniac
-          </h1>
-          <p style={{
-            color: 'var(--im-text-secondary)'
-          }}>
-            AI-Powered Interview Coaching
-          </p>
-        </div>
-
-        {/* Tab Buttons */}
-        <div className="flex mb-6 rounded-lg p-1" style={{
-          backgroundColor: 'var(--im-bg-secondary)'
-        }}>
-          <button
-            onClick={() => setIsSignUp(false)}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
-              !isSignUp ? 'text-black' : 'text-white hover:bg-white/10'
-            }`}
-            style={!isSignUp ? { background: 'linear-gradient(90deg, var(--im-accent-1), var(--im-accent-2))' } : {}}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => setIsSignUp(true)}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
-              isSignUp ? 'text-black' : 'text-white hover:bg-white/10'
-            }`}
-            style={isSignUp ? { background: 'linear-gradient(90deg, var(--im-accent-1), var(--im-accent-2))' } : {}}
-          >
-            Sign Up
-          </button>
-        </div>
-
-        {/* Error Message */}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          Recent ABT Sessions
+        </CardTitle>
+        <CardDescription>
+          Your last 5 ABT sessions (most recent first)
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         {error && (
-          <div className="mb-4 p-3 rounded-lg" style={{
-            backgroundColor: 'var(--im-error-bg)',
-            color: 'var(--im-error-text)'
-          }}>
-            {error}
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {sessions.length === 0 ? (
+          <div className="text-center text-gray-500 py-8">
+            <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium mb-2">No ABT sessions yet</p>
+            <p>Create your first ABT session above to get started!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {sessions.map((session, index) => (
+              <Card key={session.id} className="border-l-4 border-l-blue-500">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="h-4 w-4" />
+                      <span className="font-medium">{session.role}</span>
+                      <Building className="h-4 w-4 ml-2" />
+                      <span className="text-sm text-gray-600">{session.industry}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock className="h-3 w-3" />
+                      {formatDate(session.createdAt)}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-3">
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <Award className="h-4 w-4 text-green-600" />
+                      <span className="font-medium text-sm text-green-700">Achievement</span>
+                    </div>
+                    <p className="text-sm bg-green-50 p-2 rounded">{session.achievement}</p>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <Target className="h-4 w-4 text-orange-600" />
+                      <span className="font-medium text-sm text-orange-700">Because</span>
+                    </div>
+                    <p className="text-sm bg-orange-50 p-2 rounded">{session.because}</p>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <UserIcon className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium text-sm text-blue-700">Therefore</span>
+                    </div>
+                    <p className="text-sm bg-blue-50 p-2 rounded">{session.therefore}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
+      </CardContent>
+    </Card>
+  );
+};
 
-        {/* Authentication Form */}
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{
-              color: 'var(--im-text)'
-            }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              className="w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none"
-              style={{
-                backgroundColor: 'var(--im-bg)',
-                borderColor: 'var(--im-accent-2)',
-                color: 'var(--im-text)'
-              }}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{
-              color: 'var(--im-text)'
-            }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              className="w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none"
-              style={{
-                backgroundColor: 'var(--im-bg)',
-                borderColor: 'var(--im-accent-2)',
-                color: 'var(--im-text)'
-              }}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-lg font-semibold text-black transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: 'linear-gradient(90deg, var(--im-accent-1), var(--im-accent-2))',
-              boxShadow: 'var(--im-shadow-3d)'
-            }}
-          >
-            {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
-          </button>
-        </form>
+export default function HomePage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [refreshSessions, setRefreshSessions] = useState(0);
 
-        {/* Divider */}
-        <div className="my-6 flex items-center">
-          <div className="flex-1 h-px" style={{
-            backgroundColor: 'var(--im-border)'
-          }}></div>
-          <span className="px-4 text-sm" style={{
-            color: 'var(--im-text-secondary)'
-          }}>
-            Or continue with
-          </span>
-          <div className="flex-1 h-px" style={{
-            backgroundColor: 'var(--im-border)'
-          }}></div>
-        </div>
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+      setAuthLoading(false);
+    });
 
-        {/* Google Sign In */}
-        <button
-          onClick={handleGoogleAuth}
-          disabled={loading}
-          className="w-full py-3 px-4 rounded-lg border-2 font-medium transition-all hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-          style={{
-            borderColor: 'var(--im-accent-2)',
-            color: 'var(--im-text)'
-          }}
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
-          </svg>
-          Google
-        </button>
+    return () => unsubscribe();
+  }, []);
 
-        {/* Help Text */}
-        <div className="mt-6 text-center">
-          <p className="text-sm" style={{
-            color: 'var(--im-text-secondary)'
-          }}>
-            Having trouble with Google sign-in? Try disabling browser extensions or use email/password instead.
+  const handleSessionAdded = () => {
+    setRefreshSessions(prev => prev + 1);
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card>
+          <CardContent className="flex items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-3 text-lg">Loading...</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Interview Maniac
+          </h1>
+          <p className="text-lg text-gray-600">
+            Master your interview stories with the ABT framework
           </p>
         </div>
-
-        {/* Demo Features */}
-        <div className="mt-8 text-center">
-          <p className="text-sm mb-2" style={{
-            color: 'var(--im-text-secondary)'
-          }}>
-            ✨ Coming Soon: Full AI-Powered Interview Coaching
-          </p>
-          <div className="text-xs space-y-1" style={{
-            color: 'var(--im-text-secondary)'
-          }}>
-            🤖 Gemini AI Story Generation<br/>
-            🎤 Voice Recording & Analysis<br/>
-            📊 Real-time Feedback & Scoring<br/>
-            🏆 Gamified Learning Experience
-          </div>
+        
+        {/* Auth Panel */}
+        <div className="mb-8">
+          <AuthPanel className="max-w-md mx-auto" />
         </div>
+        
+        {/* Protected Content */}
+        <Protected>
+          <div className="max-w-4xl mx-auto space-y-8">
+            {user && (
+              <>
+                <AbtSessionForm user={user} onSessionAdded={handleSessionAdded} />
+                <AbtSessionsList user={user} refresh={refreshSessions} />
+              </>
+            )}
+          </div>
+        </Protected>
       </div>
     </div>
-  )
+  );
 }
