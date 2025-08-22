@@ -5,7 +5,6 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ## Repository Structure
 
 The application lives at the repository root with the following structure:
-
 - `src/` - Source code directory
 - `package.json` - Project dependencies and scripts
 - `next.config.js` - Next.js configuration
@@ -63,10 +62,10 @@ This application uses Firebase for backend services. To set up Firebase:
 
 ### 3. Security Notes
 
-- Never commit your .env.local file to version control
-- The .env.local.example file contains example values for reference
-- All Firebase configuration variables are prefixed with NEXT_PUBLIC_ as they're used client-side
-- Consider implementing Firebase Security Rules for production use
+• Never commit your .env.local file to version control
+• The .env.local.example file contains example values for reference
+• All Firebase configuration variables are prefixed with NEXT_PUBLIC_ as they're used client-side
+• Consider implementing Firebase Security Rules for production use
 
 ## Auth & Firestore
 
@@ -118,10 +117,72 @@ service cloud.firestore {
 ### ABT Framework
 
 The application helps users structure their interview stories using the ABT framework:
-
 - **Accomplishment**: What you achieved
 - **Because**: Why it was challenging or important
 - **Therefore**: What the measurable impact or result was
+
+## Gemini AI Setup
+
+This application integrates Google Gemini AI for intelligent ABT story scoring and feedback.
+
+### 1. Environment Variables
+
+Add your Gemini API key to your `.env.local` file:
+
+```env
+# Gemini AI Configuration
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+# Alternative server-side key (more secure for production)
+COMPANY_GEMINI_API_KEY=your_server_side_gemini_key
+```
+
+### 2. Get Your Gemini API Key
+
+1. Visit [Google AI Studio](https://aistudio.google.com/)
+2. Sign in with your Google account
+3. Click "Get API Key" in the top navigation
+4. Create a new API key or use an existing one
+5. Copy the API key to your `.env.local` file
+
+### 3. Gemini Integration Features
+
+- **Intelligent Scoring**: Automated evaluation of ABT stories across 6 dimensions
+- **Detailed Feedback**: Specific suggestions for improving interview narratives
+- **Scoring Rubric**: 
+  - **Clarity** (0-5): How clear and understandable is the story?
+  - **Relevance** (0-5): How relevant is this to job interview contexts?
+  - **Impact** (0-5): How significant was the result or outcome?
+  - **Metrics** (0-5): How well quantified are the results?
+  - **Story Arc** (0-5): How well does it follow ABT structure?
+  - **Concision** (0-5): How focused and concise is the narrative?
+
+### 4. Usage
+
+The Gemini integration provides:
+
+```typescript
+import { scoreAbtSession } from '@/lib/scoring';
+
+// Score an ABT session
+const result = await scoreAbtSession({
+  role: 'Software Engineer',
+  industry: 'Technology',
+  achievement: 'Led a team to optimize database performance',
+  because: 'System was experiencing 30-second query times',
+  therefore: 'Reduced query time by 80% and improved user satisfaction'
+});
+
+// Result includes scores, feedback, and recommendations
+console.log(result.averageScore); // 0-5 overall score
+console.log(result.feedback.suggestions); // Actionable improvements
+```
+
+### 5. Security Notes
+
+- **Client-side**: Use `NEXT_PUBLIC_GEMINI_API_KEY` for client-side calls (be aware of exposure)
+- **Server-side**: Use `COMPANY_GEMINI_API_KEY` for server-side API routes (more secure)
+- **Rate Limits**: Gemini API has usage quotas - monitor your usage in Google AI Studio
+- **Cost**: Review [Gemini API pricing](https://ai.google.dev/pricing) for production usage
 
 ## Learn More
 
