@@ -6,10 +6,22 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 The application lives at the repository root with the following structure:
 
-- `src/` - Source code directory
-- `package.json` - Project dependencies and scripts
-- `next.config.js` - Next.js configuration
-- `tailwind.config.ts` - Tailwind CSS configuration
+• `src/` - Source code directory
+• `package.json` - Project dependencies and scripts
+• `next.config.js` - Next.js configuration
+• `tailwind.config.ts` - Tailwind CSS configuration
+
+## 🔒 Security Warning
+
+**⚠️ IMPORTANT: Never commit sensitive information to version control!**
+
+- **DO NOT** commit `.env.local` or any files containing API keys, secrets, or sensitive data
+- The `.env.local` file has been removed from this repository and added to `.gitignore`
+- Always use `.env.local.example` as a template with placeholder values only
+- Use server-side environment variables for sensitive API keys in production
+- Review your commits before pushing to ensure no secrets are accidentally included
+
+For production deployments, set environment variables directly in your hosting platform (Vercel, Netlify, etc.) rather than committing them to the repository.
 
 ## Getting Started
 
@@ -63,10 +75,10 @@ This application uses Firebase for backend services. To set up Firebase:
 
 ### 3. Security Notes
 
-- Never commit your .env.local file to version control
-- The .env.local.example file contains example values for reference
-- All Firebase configuration variables are prefixed with NEXT_PUBLIC_ as they're used client-side
-- Consider implementing Firebase Security Rules for production use
+• Never commit your .env.local file to version control
+• The .env.local.example file contains example values for reference
+• All Firebase configuration variables are prefixed with NEXT_PUBLIC_ as they're used client-side
+• Consider implementing Firebase Security Rules for production use
 
 ## Auth & Firestore
 
@@ -78,14 +90,14 @@ To enable authentication in your Firebase project:
 
 1. Go to the [Firebase Console](https://console.firebase.google.com/)
 2. Select your project
-3. Navigate to **Authentication** > **Sign-in method**
+3. Navigate to Authentication > Sign-in method
 4. Enable the following providers:
-   - **Email/Password**: Click on Email/Password and toggle "Enable"
-   - **Google**: Click on Google, toggle "Enable", and configure OAuth consent screen
+   • Email/Password: Click on Email/Password and toggle "Enable"
+   • Google: Click on Google, toggle "Enable", and configure OAuth consent screen
 
 ### Firestore Database Setup
 
-1. In Firebase Console, navigate to **Firestore Database**
+1. In Firebase Console, navigate to Firestore Database
 2. Click "Create database"
 3. Choose "Start in test mode" initially
 4. Select a location for your database
@@ -109,19 +121,19 @@ service cloud.firestore {
 
 ### Features
 
-- **Authentication**: Email/password and Google sign-in
-- **Protected Routes**: Content only accessible after authentication
-- **ABT Session Management**: Create and view interview preparation sessions
-- **Data Security**: User data is isolated and protected
-- **Real-time Updates**: Firestore provides real-time data synchronization
+• Authentication: Email/password and Google sign-in
+• Protected Routes: Content only accessible after authentication
+• ABT Session Management: Create and view interview preparation sessions
+• Data Security: User data is isolated and protected
+• Real-time Updates: Firestore provides real-time data synchronization
 
 ### ABT Framework
 
 The application helps users structure their interview stories using the ABT framework:
 
-- **Accomplishment**: What you achieved
-- **Because**: Why it was challenging or important
-- **Therefore**: What the measurable impact or result was
+• Accomplishment: What you achieved
+• Because: Why it was challenging or important
+• Therefore: What the measurable impact or result was
 
 ## Learn More
 
