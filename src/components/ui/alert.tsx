@@ -1,54 +1,13 @@
-import React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
 
-interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'destructive'
+export function Alert({ className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div role="alert" className={`rounded-md border p-4 ${className}`} {...props} />;
 }
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant = 'default', ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        role="alert"
-        className={cn(
-          'relative w-full rounded-lg border p-4',
-          {
-            'border-border text-foreground': variant === 'default',
-            'border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-50':
-              variant === 'destructive',
-          },
-          className
-        )}
-        {...props}
-      />
-    )
-  }
-)
-Alert.displayName = 'Alert'
+export function AlertTitle({ className = '', ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return <h5 className={`mb-1 font-medium leading-none tracking-tight ${className}`} {...props} />;
+}
 
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn('mb-1 font-medium leading-none tracking-tight', className)}
-    {...props}
-  />
-))
-AlertTitle.displayName = 'AlertTitle'
-
-const AlertDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('text-sm [&_p]:leading-relaxed', className)}
-    {...props}
-  />
-))
-AlertDescription.displayName = 'AlertDescription'
-
-export { Alert, AlertTitle, AlertDescription }
+export function AlertDescription({ className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={`text-sm text-muted-foreground ${className}`} {...props} />;
+}
