@@ -14,13 +14,14 @@
     "jsx": "preserve",
     "jsxImportSource": "same-runtime/dist",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": [
