@@ -13,6 +13,16 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
+// One-time production config logging for debugging
+if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
+  console.log('Firebase Config (Production Debug):', {
+    projectId: firebaseConfig.projectId,
+    authDomain: firebaseConfig.authDomain,
+    appId: firebaseConfig.appId,
+    measurementId: firebaseConfig.measurementId
+  });
+}
+
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
