@@ -59,7 +59,7 @@ jobs:
     - name: Create wizard page scaffold
       run: |
         mkdir -p src/app/wizard
-        cat > src/app/wizard/page.tsx << 'EOF'
+        cat > src/app/wizard/page.tsx << 'WIZARD_EOF'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -89,7 +89,7 @@ export default function WizardPage() {
     </div>
   )
 }
-EOF
+WIZARD_EOF
     
     - name: Update dashboard links in page.tsx
       run: |
@@ -99,7 +99,7 @@ EOF
           cp src/app/page.tsx src/app/page.tsx.bak
           
           # Add navigation links (this is a simple approach - might need refinement)
-          cat > temp-page-update.tsx << 'EOF'
+          cat > temp-page-update.tsx << 'DASHBOARD_EOF'
 // Updated dashboard with wizard and practice links
 export default function HomePage() {
   return (
@@ -138,7 +138,7 @@ export default function HomePage() {
     </main>
   )
 }
-EOF
+DASHBOARD_EOF
           
           # Only replace if the file doesn't already have navigation
           if ! grep -q "/wizard" src/app/page.tsx && ! grep -q "/practice" src/app/page.tsx; then
