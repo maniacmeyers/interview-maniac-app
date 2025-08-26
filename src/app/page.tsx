@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -55,7 +54,6 @@ const AbtSessionForm: React.FC<{ user: User; onSessionAdded: () => void }> = ({ 
       setSuccess(true);
       onSessionAdded();
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to create ABT session');
@@ -78,15 +76,19 @@ const AbtSessionForm: React.FC<{ user: User; onSessionAdded: () => void }> = ({ 
       <CardContent>
         {success && (
           <Alert className="mb-4 border-green-500 bg-green-50">
-            <AlertDescription>ABT session created successfully!</AlertDescription>
+            <AlertDescription>
+              ABT session created successfully!
+            </AlertDescription>
           </Alert>
         )}
         {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
+          <Alert className="mb-4" variant="destructive">
+            <AlertDescription>
+              {error}
+            </AlertDescription>
           </Alert>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -156,9 +158,12 @@ const AbtSessionForm: React.FC<{ user: User; onSessionAdded: () => void }> = ({ 
             />
           </div>
           
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button className="w-full" disabled={loading} type="submit">
             {loading ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
             ) : (
               <>Create ABT Session</>
             )}
@@ -192,10 +197,10 @@ const AbtSessionsList: React.FC<{ user: User; refresh: number }> = ({ user, refr
     loadSessions();
   }, [user.uid, refresh]);
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: unknown) => {
     if (!timestamp) return 'Unknown date';
     try {
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const date = (timestamp as { toDate?: () => Date }).toDate ? (timestamp as { toDate: () => Date }).toDate() : new Date(timestamp as string | number | Date);
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch {
       return 'Unknown date';
@@ -226,8 +231,10 @@ const AbtSessionsList: React.FC<{ user: User; refresh: number }> = ({ user, refr
       </CardHeader>
       <CardContent>
         {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
+          <Alert className="mb-4" variant="destructive">
+            <AlertDescription>
+              {error}
+            </AlertDescription>
           </Alert>
         )}
         
@@ -240,7 +247,7 @@ const AbtSessionsList: React.FC<{ user: User; refresh: number }> = ({ user, refr
         ) : (
           <div className="space-y-4">
             {sessions.map((session, index) => (
-              <Card key={session.id} className="border-l-4 border-l-blue-500">
+              <Card className="border-l-4 border-l-blue-500" key={session.id}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -323,7 +330,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Interview Maniac
@@ -333,12 +339,10 @@ export default function HomePage() {
           </p>
         </div>
         
-        {/* Auth Panel */}
         <div className="mb-8">
           <AuthPanel className="max-w-md mx-auto" />
         </div>
         
-        {/* Protected Content */}
         <Protected>
           <div className="max-w-4xl mx-auto space-y-8">
             {user && (
