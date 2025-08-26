@@ -1,0 +1,224 @@
+name: Phase 2 Merge Automation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  phase2-merge:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout main branch
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        fetch-depth: 0
+    
+    - name: Configure git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+    
+    - name: Pull ABT/practice features from feat/restore-advanced-features-aug22
+      run: |
+        # Create temporary directory to handle selective file merging
+        git checkout feat/restore-advanced-features-aug22
+        mkdir -p temp-abt
+        cp src/app/practice/page.tsx temp-abt/ 2>/dev/null || echo "practice/page.tsx not found"
+        cp src/components/StoryCreator.tsx temp-abt/ 2>/dev/null || echo "StoryCreator.tsx not found"
+        cp src/components/ScoringPanel.tsx temp-abt/ 2>/dev/null || echo "ScoringPanel.tsx not found"
+        cp src/components/VoiceRecorder.tsx temp-abt/ 2>/dev/null || echo "VoiceRecorder.tsx not found"
+        cp src/components/Gamification.tsx temp-abt/ 2>/dev/null || echo "Gamification.tsx not found"
+        cp src/lib/prompts/abt.ts temp-abt/ 2>/dev/null || echo "abt.ts not found"
+        cp src/lib/api.ts temp-abt/ 2>/dev/null || echo "api.ts not found"
+        
+        # Go back to main and apply changes
+        git checkout main
+        mkdir -p src/app/practice src/components src/lib/prompts
+        mv temp-abt/page.tsx src/app/practice/ 2>/dev/null || echo "No practice page to move"
+        mv temp-abt/StoryCreator.tsx src/components/ 2>/dev/null || echo "No StoryCreator to move"
+        mv temp-abt/ScoringPanel.tsx src/components/ 2>/dev/null || echo "No ScoringPanel to move"
+        mv temp-abt/VoiceRecorder.tsx src/components/ 2>/dev/null || echo "No VoiceRecorder to move"
+        mv temp-abt/Gamification.tsx src/components/ 2>/dev/null || echo "No Gamification to move"
+        mv temp-abt/abt.ts src/lib/prompts/ 2>/dev/null || echo "No abt.ts to move"
+        mv temp-abt/api.ts src/lib/ 2>/dev/null || echo "No api.ts to move"
+        rm -rf temp-abt
+    
+    - name: Pull Gemini API route from feat/gemini-iterate-and-firebase-gamification
+      run: |
+        git checkout feat/gemini-iterate-and-firebase-gamification
+        mkdir -p temp-gemini
+        cp -r src/app/api/gemini/improve temp-gemini/ 2>/dev/null || echo "gemini/improve route not found"
+        
+        # Go back to main and apply changes
+        git checkout main
+        mkdir -p src/app/api/gemini
+        mv temp-gemini/improve src/app/api/gemini/ 2>/dev/null || echo "No gemini improve route to move"
+        rm -rf temp-gemini
+    
+    - name: Create wizard page scaffold
+      run: |
+        mkdir -p src/app/wizard
+        cat > src/app/wizard/page.tsx << 'EOF'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Interview Wizard - Interview Maniac',
+  description: 'Step-by-step interview preparation wizard'
+}
+
+export default function WizardPage() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Interview Preparation Wizard</h1>
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <p className="text-gray-600 mb-4">
+          Welcome to the Interview Preparation Wizard! This guided experience will help you:
+        </p>
+        <ul className="list-disc pl-6 space-y-2 text-gray-700">
+          <li>Structure your accomplishment stories using the ABT framework</li>
+          <li>Practice with AI-powered feedback</li>
+          <li>Track your progress and improvements</li>
+        </ul>
+        <div className="mt-8">
+          <p className="text-sm text-gray-500">
+            Scaffold created - ready for implementation
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+EOF
+    
+    - name: Update dashboard links in page.tsx
+      run: |
+        # Check if src/app/page.tsx exists and update it
+        if [ -f "src/app/page.tsx" ]; then
+          # Create a backup
+          cp src/app/page.tsx src/app/page.tsx.bak
+          
+          # Add navigation links (this is a simple approach - might need refinement)
+          cat > temp-page-update.tsx << 'EOF'
+// Updated dashboard with wizard and practice links
+export default function HomePage() {
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold text-center mb-8">
+        Interview Maniac
+      </h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 className="text-2xl font-semibold mb-4">🎯 Interview Wizard</h2>
+          <p className="text-gray-600 mb-4">
+            Step-by-step guided preparation for your interviews
+          </p>
+          <a 
+            href="/wizard" 
+            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Start Wizard
+          </a>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 className="text-2xl font-semibold mb-4">💪 Practice Mode</h2>
+          <p className="text-gray-600 mb-4">
+            Practice your ABT stories with AI-powered feedback
+          </p>
+          <a 
+            href="/practice" 
+            className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Start Practice
+          </a>
+        </div>
+      </div>
+    </main>
+  )
+}
+EOF
+          
+          # Only replace if the file doesn't already have navigation
+          if ! grep -q "/wizard" src/app/page.tsx && ! grep -q "/practice" src/app/page.tsx; then
+            mv temp-page-update.tsx src/app/page.tsx
+          else
+            echo "Dashboard already has navigation links"
+            rm temp-page-update.tsx
+          fi
+        else
+          echo "src/app/page.tsx not found - will need manual creation"
+        fi
+    
+    - name: Commit and push changes
+      run: |
+        git add -A
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "feat: Phase 2 merge - Add ABT practice features, Gemini API, wizard scaffold, and dashboard navigation
+          
+          - Pull ABT/practice components from feat/restore-advanced-features-aug22
+          - Pull Gemini improve API route from feat/gemini-iterate-and-firebase-gamification  
+          - Create wizard page scaffold at src/app/wizard/page.tsx
+          - Update dashboard with navigation links to /wizard and /practice
+          - Automated merge via GitHub Actions workflow"
+          git push origin automation/phase2-merge
+        fi
+    
+    - name: Create Pull Request
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: pr } = await github.rest.pulls.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: 'Phase 2 Merge: ABT Practice + Gemini API + Wizard Scaffold',
+            head: 'automation/phase2-merge',
+            base: 'main',
+            body: `# Phase 2 Feature Integration
+            
+            This PR integrates key features for Phase 2 of the Interview Maniac app:
+            
+            ## 🚀 Features Added
+            
+            ### ABT Practice Features (from feat/restore-advanced-features-aug22)
+            - \`src/app/practice/page.tsx\` - Practice mode interface
+            - \`src/components/StoryCreator.tsx\` - Story creation component  
+            - \`src/components/ScoringPanel.tsx\` - AI scoring interface
+            - \`src/components/VoiceRecorder.tsx\` - Voice recording functionality
+            - \`src/components/Gamification.tsx\` - Gamification elements
+            - \`src/lib/prompts/abt.ts\` - ABT framework prompts
+            - \`src/lib/api.ts\` - API utilities
+            
+            ### Gemini API Integration (from feat/gemini-iterate-and-firebase-gamification)
+            - \`src/app/api/gemini/improve\` - Gemini improvement API route
+            
+            ### New Features
+            - \`src/app/wizard/page.tsx\` - Interview preparation wizard scaffold
+            - Updated \`src/app/page.tsx\` with navigation to /wizard and /practice
+            
+            ## 📋 Next Steps for Review
+            
+            1. **Code Review**: Review merged components for conflicts and compatibility
+            2. **Testing**: Test ABT practice flow and Gemini API integration
+            3. **UI/UX**: Verify dashboard navigation and wizard scaffold
+            4. **Dependencies**: Ensure all required packages are installed
+            5. **Environment**: Verify Gemini API keys and Firebase config
+            
+            ## 🚀 Deployment Checklist
+            
+            - [ ] Review and merge this PR
+            - [ ] Test in staging environment
+            - [ ] Verify environment variables are set
+            - [ ] Deploy to production
+            - [ ] Monitor for any issues
+            
+            ---
+            
+            *This PR was created automatically via GitHub Actions workflow*`
+          });
+          
+          console.log(\`Pull request created: #\${pr.number}\`);
+          console.log(\`URL: \${pr.html_url}\`);
