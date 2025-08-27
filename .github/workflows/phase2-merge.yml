@@ -67,47 +67,8 @@ jobs:
           # Create a backup
           cp src/app/page.tsx src/app/page.tsx.bak
           
-          # Add navigation links using quoted heredoc for safety
-          cat > temp-page-update.tsx << 'EOF'
-// Updated dashboard with wizard and practice links
-export default function HomePage() {
-  return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-center mb-8">
-        Interview Maniac
-      </h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 className="text-2xl font-semibold mb-4">🎯 Interview Wizard</h2>
-          <p className="text-gray-600 mb-4">
-            Step-by-step guided preparation for your interviews
-          </p>
-          <a
-            href="/wizard" 
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Start Wizard
-          </a>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 className="text-2xl font-semibold mb-4">💪 Practice Mode</h2>
-          <p className="text-gray-600 mb-4">
-            Practice your ABT stories with AI-powered feedback
-          </p>
-          <a
-            href="/practice" 
-            className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            Start Practice
-          </a>
-        </div>
-      </div>
-    </main>
-  )
-}
-EOF
+          # Add navigation links using base64 to avoid YAML parsing issues
+          echo "Ly8gVXBkYXRlZCBkYXNoYm9hcmQgd2l0aCB3aXphcmQgYW5kIHByYWN0aWNlIGxpbmtzCmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIEhvbWVQYWdlKCkgewogIHJldHVybiAoCiAgICA8bWFpbiBjbGFzc05hbWU9ImNvbnRhaW5lciBteC1hdXRvIHB4LTQgcHktOCI+CiAgICAgIDxoMSBjbGFzc05hbWU9InRleHQtNHhsIGZvbnQtYm9sZCB0ZXh0LWNlbnRlciBtYi04Ij4KICAgICAgICBJbnRlcnZpZXcgTWFuaWFjCiAgICAgIDwvaDE+CiAgICAgIAogICAgICA8ZGl2IGNsYXNzTmFtZT0iZ3JpZCBncmlkLWNvbHMtMSBtZDpncmlkLWNvbHMtMiBnYXAtNiBtYXgtdy00eGwgbXgtYXV0byI+CiAgICAgICAgPGRpdiBjbGFzc05hbWU9ImJnLXdoaXRlIHJvdW5kZWQtbGcgc2hhZG93LWxnIHAtNiBob3ZlcjpzaGFkb3cteGwgdHJhbnNpdGlvbi1zaGFkb3ciPgogICAgICAgICAgPGgyIGNsYXNzTmFtZT0idGV4dC0yeGwgZm9udC1zZW1pYm9sZCBtYi00Ij7wn46vIEludGVydmlldyBXaXphcmQ8L2gyPgogICAgICAgICAgPHAgY2xhc3NOYW1lPSJ0ZXh0LWdyYXktNjAwIG1iLTQiPgogICAgICAgICAgICBTdGVwLWJ5LXN0ZXAgZ3VpZGVkIHByZXBhcmF0aW9uIGZvciB5b3VyIGludGVydmlld3MKICAgICAgICAgIDwvcD4KICAgICAgICAgIDxhCiAgICAgICAgICAgIGhyZWY9Ii93aXphcmQiIAogICAgICAgICAgICBjbGFzc05hbWU9ImlubGluZS1ibG9jayBiZy1ibHVlLTYwMCB0ZXh0LXdoaXRlIHB4LTYgcHktMiByb3VuZGVkLWxnIGhvdmVyOmJnLWJsdWUtNzAwIHRyYW5zaXRpb24tY29sb3JzIgogICAgICAgICAgPgogICAgICAgICAgICBTdGFydCBXaXphcmQKICAgICAgICAgIDwvYT4KICAgICAgICA8L2Rpdj4KICAgICAgICAKICAgICAgICA8ZGl2IGNsYXNzTmFtZT0iYmctd2hpdGUgcm91bmRlZC1sZyBzaGFkb3ctbGcgcC02IGhvdmVyOnNoYWRvdy14bCB0cmFuc2l0aW9uLXNoYWRvdyI+CiAgICAgICAgICA8aDIgY2xhc3NOYW1lPSJ0ZXh0LTJ4bCBmb250LXNlbWlib2xkIG1iLTQiPvCfkqogUHJhY3RpY2UgTW9kZTwvaDI+CiAgICAgICAgICA8cCBjbGFzc05hbWU9InRleHQtZ3JheS02MDAgbWItNCI+CiAgICAgICAgICAgIFByYWN0aWNlIHlvdXIgQUJUIHN0b3JpZXMgd2l0aCBBSS1wb3dlcmVkIGZlZWRiYWNrCiAgICAgICAgICA8L3A+CiAgICAgICAgICA8YQogICAgICAgICAgICBocmVmPSIvcHJhY3RpY2UiIAogICAgICAgICAgICBjbGFzc05hbWU9ImlubGluZS1ibG9jayBiZy1ncmVlbi02MDAgdGV4dC13aGl0ZSBweC02IHB5LTIgcm91bmRlZC1sZyBob3ZlcjpiZy1ncmVlbi03MDAgdHJhbnNpdGlvbi1jb2xvcnMiCiAgICAgICAgICA+CiAgICAgICAgICAgIFN0YXJ0IFByYWN0aWNlCiAgICAgICAgICA8L2E+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvZGl2PgogICAgPC9tYWluPgogICkKfQo=" | base64 -d > temp-page-update.tsx
           
           # Only replace if the file doesn't already have navigation
           if ! grep -q "/wizard" src/app/page.tsx && ! grep -q "/practice" src/app/page.tsx; then
@@ -189,5 +150,4 @@ EOF
             *This PR was created automatically via GitHub Actions workflow*`
           });
           
-          console.log(`Pull request created: #${pr.number}`);
-          console.log(`URL: ${pr.html_url}`);
+          console.log(`
