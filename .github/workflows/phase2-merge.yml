@@ -1,8 +1,6 @@
 name: Phase 2 Merge Automation
-
 on:
   workflow_dispatch:
-
 jobs:
   phase2-merge:
     runs-on: ubuntu-latest
@@ -59,37 +57,8 @@ jobs:
     - name: Create wizard page scaffold
       run: |
         mkdir -p src/app/wizard
-        cat > src/app/wizard/page.tsx << 'EOF'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Interview Wizard - Interview Maniac',
-  description: 'Step-by-step interview preparation wizard'
-}
-
-export default function WizardPage() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Interview Preparation Wizard</h1>
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <p className="text-gray-600 mb-4">
-          Welcome to the Interview Preparation Wizard! This guided experience will help you:
-        </p>
-        <ul className="list-disc pl-6 space-y-2 text-gray-700">
-          <li>Structure your accomplishment stories using the ABT framework</li>
-          <li>Practice with AI-powered feedback</li>
-          <li>Track your progress and improvements</li>
-        </ul>
-        <div className="mt-8">
-          <p className="text-sm text-gray-500">
-            Scaffold created - ready for implementation
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-EOF
+        # Create wizard page using base64 to avoid YAML parsing issues
+        echo "aW1wb3J0IHsgTWV0YWRhdGEgfSBmcm9tICduZXh0JwpleHBvcnQgY29uc3QgbWV0YWRhdGE6IE1ldGFkYXRhID0gewogIHRpdGxlOiAnSW50ZXJ2aWV3IFdpemFyZCAtIEludGVydmlldyBNYW5pYWMnLAogIGRlc2NyaXB0aW9uOiAnU3RlcC1ieS1zdGVwIGludGVydmlldyBwcmVwYXJhdGlvbiB3aXphcmQnCn0KZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gV2l6YXJkUGFnZSgpIHsKICByZXR1cm4gKAogICAgPGRpdiBjbGFzc05hbWU9ImNvbnRhaW5lciBteC1hdXRvIHB4LTQgcHktOCI+CiAgICAgIDxoMSBjbGFzc05hbWU9InRleHQtM3hsIGZvbnQtYm9sZCBtYi02Ij5JbnRlcnZpZXcgUHJlcGFyYXRpb24gV2l6YXJkPC9oMT4KICAgICAgPGRpdiBjbGFzc05hbWU9ImJnLXdoaXRlIHJvdW5kZWQtbGcgc2hhZG93LWxnIHA2Ij4KICAgICAgICA8cCBjbGFzc05hbWU9InRleHQtZ3JheS02MDAgbWItNCI+CiAgICAgICAgICBXZWxjb21lIHRvIHRoZSBJbnRlcnZpZXcgUHJlcGFyYXRpb24gV2l6YXJkISBUaGlzIGd1aWRlZCBleHBlcmllbmNlIHdpbGwgaGVscCB5b3U6CiAgICAgICAgPC9wPgogICAgICAgIDx1bCBjbGFzc05hbWU9Imxpc3QtZGlzYyBwbC02IHNwYWNlLXktMiB0ZXh0LWdyYXktNzAwIj4KICAgICAgICAgIDxsaT5TdHJ1Y3R1cmUgeW91ciBhY2NvbXBsaXNobWVudCBzdG9yaWVzIHVzaW5nIHRoZSBBQlQgZnJhbWV3b3JrPC9saT4KICAgICAgICAgIDxsaT5QcmFjdGljZSB3aXRoIEFJLXBvd2VyZWQgZmVlZGJhY2s8L2xpPgogICAgICAgICAgPGxpPlRyYWNrIHlvdXIgcHJvZ3Jlc3MgYW5kIGltcHJvdmVtZW50czwvbGk+CiAgICAgICAgPC91bD4KICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibXQtOCI+CiAgICAgICAgICA8cCBjbGFzc05hbWU9InRleHQtc20gdGV4dC1ncmF5LTUwMCI+CiAgICAgICAgICAgIFNjYWZmb2xkIGNyZWF0ZWQgLSByZWFkeSBmb3IgaW1wbGVtZW50YXRpb24KICAgICAgICAgIDwvcD4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KICA.pCn0K" | base64 -d > src/app/wizard/page.tsx
     
     - name: Update dashboard links in page.tsx
       run: |
@@ -98,7 +67,7 @@ EOF
           # Create a backup
           cp src/app/page.tsx src/app/page.tsx.bak
           
-          # Add navigation links (this is a simple approach - might need refinement)
+          # Add navigation links using quoted heredoc for safety
           cat > temp-page-update.tsx << 'EOF'
 // Updated dashboard with wizard and practice links
 export default function HomePage() {
@@ -114,7 +83,7 @@ export default function HomePage() {
           <p className="text-gray-600 mb-4">
             Step-by-step guided preparation for your interviews
           </p>
-          <a 
+          <a
             href="/wizard" 
             className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
@@ -127,7 +96,7 @@ export default function HomePage() {
           <p className="text-gray-600 mb-4">
             Practice your ABT stories with AI-powered feedback
           </p>
-          <a 
+          <a
             href="/practice" 
             className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
