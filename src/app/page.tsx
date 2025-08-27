@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { addAbtSession, listAbtSessions, AbtSession } from '@/lib/firestore';
@@ -10,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Plus, Clock, User as UserIcon, Building, Award, Target } from 'lucide-react';
+import { Loader2, Plus, Clock, User as UserIcon, Building, Award, Target, Wand2, Trophy } from 'lucide-react';
 
 interface AbtFormData {
   role: string;
@@ -242,7 +243,7 @@ const AbtSessionsList: React.FC<{ user: User; refresh: number }> = ({ user, refr
           <div className="text-center text-gray-500 py-8">
             <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p className="text-lg font-medium mb-2">No ABT sessions yet</p>
-            <p>Create your first ABT session above to get started!</p>
+            Create your first ABT session above to get started!
           </div>
         ) : (
           <div className="space-y-4">
@@ -341,6 +342,34 @@ export default function HomePage() {
         
         <div className="mb-8">
           <AuthPanel className="max-w-md mx-auto" />
+        </div>
+        
+        {/* Navigation Links */}
+        <div className="max-w-md mx-auto mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center">Choose Your Path</CardTitle>
+              <CardDescription className="text-center">
+                Select how you'd like to prepare for your interviews
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Link href="/wizard" className="block">
+                <Button className="w-full flex items-center justify-center gap-2 h-12" variant="outline">
+                  <Wand2 className="h-5 w-5" />
+                  Interview Wizard
+                  <span className="text-sm text-gray-500 ml-2">Step-by-step guidance</span>
+                </Button>
+              </Link>
+              <Link href="/practice" className="block">
+                <Button className="w-full flex items-center justify-center gap-2 h-12" variant="outline">
+                  <Trophy className="h-5 w-5" />
+                  Practice Arena
+                  <span className="text-sm text-gray-500 ml-2">Mock interviews & exercises</span>
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
         
         <Protected>
